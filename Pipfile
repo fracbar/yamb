@@ -1,0 +1,10 @@
+[requires]
+python_version = '3.6'
+
+[packages]
+Flask = "*"
+Flask-JSON = "*"
+
+[dev-packages]
+pytest = "*"
+requests = "*"

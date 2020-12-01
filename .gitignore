@@ -1,0 +1,5 @@
+.idea
+.gradle
+**/__pycache__
+fracbar.yamb.egg-info
+Pipfile.lock
