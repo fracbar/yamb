@@ -2,5 +2,5 @@ version: "3"
 services:
   yamb:
     build:
-      context: https://github.com/fracbar/yamb.git
+      context: https://github.com/fracbar/yamb.git#main
       dockerfile: Dockerfile
