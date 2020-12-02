@@ -14,17 +14,21 @@ def create_new_message():
     mb.put(None, message, prio, ttl)
     return None, 200
 
-@app.route('/<string:board_id>/message', methods=['POST'])
+@app.route('/message/<string:board_id>', methods=['POST'])
 @as_json
 def create_new_message_for_board(board_id):
+    data = request.get_json(force=True)
     (message, prio, ttl) = parse_message(data)
     mb.put(board_id, message, prio, ttl)
     return None, 200
 
-@app.route('/messages', methods=['GET'])
+@app.route('/messages/<string:board_id>', methods=['GET'])
 @as_json
-def list_message():
-    return mb.get()
+def list_message(board_id):
+    count = request.args.get('count', -1)
+    broadcast_count = request.args.get('broadcastCount', -1)
+
+    return mb.get(board_id, count=count, broadcast_count=broadcast_count)
 
 
 def parse_message(req):
