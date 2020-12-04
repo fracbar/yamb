@@ -10,16 +10,16 @@ mb = MemoryBoard()
 @as_json
 def create_new_message():
     data = request.get_json(force=True)
-    (message, prio, ttl) = parse_message(data)
-    mb.put(None, message, prio, ttl)
+    (group, message, prio, ttl) = parse_message(data)
+    mb.put(None, group, message, group=group, prio=prio, ttl=ttl)
     return None, 200
 
 @app.route('/message/<string:board_id>', methods=['POST'])
 @as_json
 def create_new_message_for_board(board_id):
     data = request.get_json(force=True)
-    (message, prio, ttl) = parse_message(data)
-    mb.put(board_id, message, prio, ttl)
+    (group, message, prio, ttl) = parse_message(data)
+    mb.put(board_id, message, group=group, prio=prio, ttl=ttl)
     return None, 200
 
 @app.route('/messages/<string:board_id>', methods=['GET'])
@@ -37,6 +37,10 @@ def parse_message(req):
     else:
         message = req['message']
 
+    group = None
+    if "group" in req:
+        group = req['group']
+
     prio = 2
     if "prio" in req:
         prio = int(req['prio'])
@@ -45,7 +49,7 @@ def parse_message(req):
     if "ttl" in req:
         ttl = int(req['ttl'])
 
-    return message, prio, ttl
+    return group, message, prio, ttl
 
 
 if __name__ == '__main__':
