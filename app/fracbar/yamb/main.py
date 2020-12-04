@@ -11,7 +11,7 @@ mb = MemoryBoard()
 def create_new_message():
     data = request.get_json(force=True)
     (group, message, prio, ttl) = parse_message(data)
-    mb.put(None, group, message, group=group, prio=prio, ttl=ttl)
+    mb.put(None, message, group=group, prio=prio, ttl=ttl)
     return None, 200
 
 @app.route('/message/<string:board_id>', methods=['POST'])
@@ -25,10 +25,18 @@ def create_new_message_for_board(board_id):
 @app.route('/messages/<string:board_id>', methods=['GET'])
 @as_json
 def list_message(board_id):
-    count = request.args.get('count', -1)
+    count = int(request.args.get('count', -1))
     broadcast_count = request.args.get('broadcastCount', -1)
 
-    return mb.get(board_id, count=count, broadcast_count=broadcast_count)
+    fill_empty = False
+    if "fillWithBlanks" in request.args and count > 0:
+        fill_empty = True
+
+    messages = mb.get(board_id, count=count, broadcast_count=broadcast_count)
+    if fill_empty and len(messages) < count:
+        messages.extend([''] * (count - len(messages)))
+
+    return {"messages": messages}
 
 
 def parse_message(req):

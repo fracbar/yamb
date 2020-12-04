@@ -25,9 +25,10 @@ def test_list_message(client):
 
     data = json.loads(response.get_data(as_text=True))
     assert response.status_code == 200
-    assert len(data) == 2
-    assert data[0] == "Broadcast 1"
-    assert data[1] == "Board 1"
+    assert "messages" in data
+    assert len(data["messages"]) == 2
+    assert data["messages"][0] == "Broadcast 1"
+    assert data["messages"][1] == "Board 1"
 
     # add one more
     payload = json.dumps({"message": "Board 2"})
@@ -36,10 +37,16 @@ def test_list_message(client):
     response = client.get('/messages/test', headers={"Content-Type": "application/json"})
     data = json.loads(response.get_data(as_text=True))
     assert response.status_code == 200
-    assert len(data) == 3
+    assert len(data["messages"]) == 3
     response = client.get('/messages/test?count=2&broadcastCount=2', headers={"Content-Type": "application/json"})
     data = json.loads(response.get_data(as_text=True))
-    assert len(data) == 2
-    assert data[0] == "Broadcast 1"
-    assert data[1] == "Board 2"
+    assert len(data["messages"]) == 2
+    assert data["messages"][0] == "Broadcast 1"
+    assert data["messages"][1] == "Board 2"
+
+    # test emptyString
+    response = client.get('/messages/test?count=10&fillWithBlanks=true', headers={"Content-Type": "application/json"})
+    data = json.loads(response.get_data(as_text=True))
+    assert len(data["messages"]) == 10
+    assert data["messages"][9] == ""
 
