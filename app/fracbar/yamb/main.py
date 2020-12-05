@@ -6,20 +6,36 @@ FlaskJSON(app)
 
 mb = MemoryBoard()
 
-@app.route('/message', methods=['POST'])
+@app.route('/broadcast-message/<string:group>', methods=['PUT'])
 @as_json
-def create_new_message():
+def create_new_group(group):
     data = request.get_json(force=True)
-    (group, message, prio, ttl) = parse_message(data)
+    (message, prio, ttl) = parse_message(data)
     mb.put(None, message, group=group, prio=prio, ttl=ttl)
     return None, 200
 
-@app.route('/message/<string:board_id>', methods=['POST'])
+@app.route('/broadcast-message', methods=['PUT'])
+@as_json
+def create_new_message():
+    data = request.get_json(force=True)
+    (message, prio, ttl) = parse_message(data)
+    mb.put(None, message, group=None, prio=prio, ttl=ttl)
+    return None, 200
+
+@app.route('/message/<string:board_id>/<string:group>', methods=['PUT'])
+@as_json
+def create_new_group_for_board(board_id, group):
+    data = request.get_json(force=True)
+    (message, prio, ttl) = parse_message(data)
+    mb.put(board_id, message, group=group, prio=prio, ttl=ttl)
+    return None, 200
+
+@app.route('/message/<string:board_id>', methods=['PUT'])
 @as_json
 def create_new_message_for_board(board_id):
     data = request.get_json(force=True)
-    (group, message, prio, ttl) = parse_message(data)
-    mb.put(board_id, message, group=group, prio=prio, ttl=ttl)
+    (message, prio, ttl) = parse_message(data)
+    mb.put(board_id, message, group=None, prio=prio, ttl=ttl)
     return None, 200
 
 @app.route('/messages/<string:board_id>', methods=['GET'])
@@ -38,16 +54,23 @@ def list_message(board_id):
 
     return {"messages": messages}
 
+@app.route('/broadcast-message/<string:group_or_message>', methods=['DELETE'])
+@as_json
+def delete_message(group_or_message):
+    mb.delete(None, group=group_or_message)
+    return None, 200
+
+@app.route('/message/<string:board_id>/<string:group_or_message>', methods=['DELETE'])
+@as_json
+def delete_message_from_board(board_id, group_or_message):
+    mb.delete(board_id, group=group_or_message)
+    return None, 200
 
 def parse_message(req):
     if not req['message']:
         return 'bad request, missing message!', 400
     else:
         message = req['message']
-
-    group = None
-    if "group" in req:
-        group = req['group']
 
     prio = 2
     if "prio" in req:
@@ -57,7 +80,7 @@ def parse_message(req):
     if "ttl" in req:
         ttl = int(req['ttl'])
 
-    return group, message, prio, ttl
+    return message, prio, ttl
 
 
 if __name__ == '__main__':

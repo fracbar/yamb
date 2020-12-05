@@ -8,8 +8,6 @@ def sort_message(item1, item2):
     else:
         return prio_sort
 
-
-
 class MemoryBoard:
     _instance = None
 
@@ -33,6 +31,8 @@ class MemoryBoard:
         if not group:
             group = message
 
+        # print("Erstelle msg %s (%s) für board %s" % (message, group, board))
+
         now = datetime.now()
         # process message
         expire = now + timedelta(seconds=ttl)
@@ -55,6 +55,10 @@ class MemoryBoard:
             answer += self.retrieve_messages(board, count if count == -1 else count - current_count)
 
         return answer
+
+    def delete(self, board, group):
+        if board in self.board:
+            del self.board[group]
 
     def retrieve_messages(self, board, count):
         answer = []
