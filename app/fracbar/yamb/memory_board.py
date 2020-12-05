@@ -23,6 +23,7 @@ class MemoryBoard:
     broadcast_board = "__all__"
 
     def put(self, board, message, group=None, prio=2, ttl=300):
+        print("Instanz bei put %s" % self)
         if not board:
             board = MemoryBoard.broadcast_board
 
@@ -41,17 +42,19 @@ class MemoryBoard:
         self._clean(board)
 
     def get(self, board, count=-1, broadcast_count=-1):
-            count = int(count)
-            broadcast_count = int(broadcast_count)
+        print("Instanz bei get %s" % self)
 
-            answer = []
+        count = int(count)
+        broadcast_count = int(broadcast_count)
 
-            answer += self.retrieve_messages(MemoryBoard.broadcast_board, broadcast_count)
-            current_count = len(answer)
-            if count == -1 or current_count < count:
-                answer += self.retrieve_messages(board, count if count == -1 else count - current_count)
+        answer = []
 
-            return answer
+        answer += self.retrieve_messages(MemoryBoard.broadcast_board, broadcast_count)
+        current_count = len(answer)
+        if count == -1 or current_count < count:
+            answer += self.retrieve_messages(board, count if count == -1 else count - current_count)
+
+        return answer
 
     def retrieve_messages(self, board, count):
         answer = []
