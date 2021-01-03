@@ -21,7 +21,6 @@ class MemoryBoard:
     broadcast_board = "__all__"
 
     def put(self, board, message, group=None, prio=2, ttl=300):
-        print("Instanz bei put %s" % self)
         if not board:
             board = MemoryBoard.broadcast_board
 
@@ -42,17 +41,37 @@ class MemoryBoard:
         self._clean(board)
 
     def get(self, board, count=-1, broadcast_count=-1):
-        print("Instanz bei get %s" % self)
 
         count = int(count)
         broadcast_count = int(broadcast_count)
 
         answer = []
+        if count == 0:
+            return answer
 
-        answer += self.retrieve_messages(MemoryBoard.broadcast_board, broadcast_count)
-        current_count = len(answer)
-        if count == -1 or current_count < count:
-            answer += self.retrieve_messages(board, count if count == -1 else count - current_count)
+        board_messages = self.retrieve_messages(board, count)
+        broadcast_messages = self.retrieve_messages(MemoryBoard.broadcast_board, broadcast_count if count == -1 else count)
+        if count == -1:
+            answer += board_messages
+            answer += broadcast_messages
+        elif broadcast_count == -1 or count <= broadcast_count:
+            if len(broadcast_messages) < count:
+                answer += board_messages[: count - len(broadcast_messages)]
+
+            answer += broadcast_messages[:count]
+        else:
+            board_count = count - broadcast_count
+
+            answer += board_messages[: board_count]
+            if broadcast_count > 0:
+                if len(broadcast_messages) < broadcast_count:
+                    # fill with board
+                    answer += board_messages[board_count: board_count + (broadcast_count - len(broadcast_messages))]
+
+                if len(board_messages) < board_count:
+                    answer += broadcast_messages[: count - len(board_messages)]
+                else:
+                    answer += broadcast_messages[:broadcast_count]
 
         return answer
 

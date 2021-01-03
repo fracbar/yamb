@@ -27,8 +27,8 @@ def test_list_message(client):
     assert response.status_code == 200
     assert "messages" in data
     assert len(data["messages"]) == 2
-    assert data["messages"][0] == "Broadcast 1"
-    assert data["messages"][1] == "Board 1"
+    assert data["messages"][0] == "Board 1"
+    assert data["messages"][1] == "Broadcast 1"
 
     # add one more
     payload = json.dumps({"message": "Board 2"})
@@ -37,8 +37,8 @@ def test_list_message(client):
     data = assert_message(client, '/messages/test', 3)
 
     data = assert_message(client, '/messages/test?count=2&broadcastCount=2', 2)
-    assert data["messages"][0] == "Broadcast 1"
-    assert data["messages"][1] == "Board 2"
+    assert data["messages"][0] == "Board 2"
+    assert data["messages"][1] == "Broadcast 1"
 
     # test emptyString
     data = assert_message(client, '/messages/test?count=10&fillWithBlanks=true', 10)
